@@ -1,9 +1,10 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Menu, Notification, ipcMain } = require('electron')
+const { app, BrowserWindow, Menu, ipcMain } = require('electron')
+const { Notifications } = require('./notifications.js')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow, notificationTimer, notificationIntervalInMinutes
+let mainWindow
 
 function createWindow() {
 	// Create the browser window.
@@ -30,10 +31,10 @@ function createWindow() {
 	})
 
 	// Build menu from template
-	const mainMenu = Menu.buildFromTemplate(mainMenuTemplate)
+	const mainMenu = Menu.buildFromTemplate(MainMenuTemplate)
 	Menu.setApplicationMenu(mainMenu)
 	
-	notificationIntervalInMinutes = 0.2 // Default
+	Notifications.SetNotificationTimer(0.5) // 30s
 }
 
 // This method will be called when Electron has finished
@@ -56,31 +57,22 @@ app.on('activate', function () {
 
 app.setAppUserModelId(process.execPath) // Enable notifications while developing
 
-ipcMain.on('set-timer', function(event, data) {
-	setNotificationTimer()
+ipcMain.on('start-timer', function(event, data) {
+	Notifications.StartNotificationTimer()
  });
 
 function setNotificationTimer(){
-	console.log("Setting timer to " + notificationIntervalInMinutes + " minutes.")
-	clearInterval(notificationTimer)
-	notificationTimer = setInterval(showNotification, notificationIntervalInMinutes * 60 * 1000)
+	
 }
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-// Create menu template
-const mainMenuTemplate = [
+const MainMenuTemplate = [
 	{
 		label: 'Menu',
 		submenu: [
 			{
-				label: 'Show notification',
-				accelerator: process.platform == 'darwin' ? 'Command+N' : 'Ctrl+N',
-				click() {
-					showNotification()
-				}
-			}, {
 				label: 'Exit',
 				accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',
 				click() {
@@ -90,12 +82,3 @@ const mainMenuTemplate = [
 		]
 	}
 ]
-
-function showNotification() {
-	console.log("Showing notification...")
-	let options = {
-		"title": "MoveeT",
-		"body": "It's about time to MoveeT!"
-	}
-	let notification = new Notification(options).show()
-}

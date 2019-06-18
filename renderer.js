@@ -4,6 +4,6 @@
 
 const { ipcRenderer } = require('electron')
 
-document.getElementById('set-timer').addEventListener('click', () => {
-	ipcRenderer.send('set-timer')
+document.getElementById('start-timer').addEventListener('click', () => {
+	ipcRenderer.send('start-timer')
 })
